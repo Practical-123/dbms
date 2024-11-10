@@ -1,0 +1,82 @@
+create database Library;
+use Library;
+
+-- Step 1: Creating the Library_Audit table to track updates and deletes
+CREATE TABLE Library_Audit (
+    B_id INT,
+    Title VARCHAR(255),
+    Edition VARCHAR(50),
+    no_of_copies INT,
+    date_of_mod DATETIME,
+    type_of_operation VARCHAR(50),
+    user_who_performed VARCHAR(100)
+);
+
+-- Step 2: Trigger for tracking updates or deletions in the Library table
+DELIMITER $$
+
+CREATE TRIGGER track_library_updates
+AFTER UPDATE OR DELETE ON Library
+FOR EACH ROW
+BEGIN
+    DECLARE operation_type VARCHAR(50);
+    
+    -- Determine the operation type (either 'UPDATE' or 'DELETE')
+    IF (OLD.B_id IS NOT NULL) THEN
+        SET operation_type = IFNULL(OLD.B_id, 'DELETE');
+    END IF;
+
+    -- Insert the old values into Library_Audit table for tracking
+    INSERT INTO Library_Audit (B_id, Title, Edition, no_of_copies, date_of_mod, type_of_operation, user_who_performed)
+    VALUES (OLD.B_id, OLD.Title, OLD.Edition, OLD.no_of_copies, NOW(), operation_type, USER());
+END$$
+
+DELIMITER ;
+
+-- Step 3: Trigger to check the number of copies before issuing a book
+DELIMITER $$
+
+CREATE TRIGGER check_availability_before_issue
+BEFORE INSERT ON Transaction
+FOR EACH ROW
+BEGIN
+    -- Check if the number of copies being issued is greater than the available copies in the Library table
+    DECLARE available_copies INT;
+    
+    -- Get the available copies from the Library table for the specific book
+    SELECT no_of_copies INTO available_copies
+    FROM Library
+    WHERE B_id = NEW.Book_id;
+    
+    -- If the number of copies to be issued is greater than available copies, adjust the number of copies issued
+    IF (NEW.no_of_copies_issued > available_copies) THEN
+        SET NEW.no_of_copies_issued = available_copies;
+    END IF;
+END$$
+
+DELIMITER ;
+
+-- Step 4: Trigger to update the number of copies available after the book is issued or returned
+DELIMITER $$
+
+CREATE TRIGGER update_library_copies_after_transaction
+AFTER INSERT OR UPDATE ON Transaction
+FOR EACH ROW
+BEGIN
+    DECLARE operation_type VARCHAR(50);
+
+    -- Determine if the transaction is an issue or return
+    IF NEW.Issue_or_Return = 'issue' THEN
+        -- Subtract the number of copies issued
+        UPDATE Library
+        SET no_of_copies = no_of_copies - NEW.no_of_copies_issued
+        WHERE B_id = NEW.Book_id;
+    ELSEIF NEW.Issue_or_Return = 'return' THEN
+        -- Add the number of copies returned
+        UPDATE Library
+        SET no_of_copies = no_of_copies + NEW.no_of_copies_issued
+        WHERE B_id = NEW.Book_id;
+    END IF;
+END$$
+
+DELIMITER ;

@@ -1,0 +1,52 @@
+CREATE TABLE borrower_t7 (
+    roll_no INT,
+    name VARCHAR(20),
+    date_of_i DATE,
+    name_of_book VARCHAR(20),
+    status VARCHAR(10)
+);
+
+CREATE TABLE fine_t7 (
+    roll_no INT,
+    date_of_r DATE,
+    amt INT
+);
+
+INSERT INTO borrower_t7 VALUES (1, 'harsh', TO_DATE('2024-07-26', 'YYYY-MM-DD'), 'harry potter', 'i');
+INSERT INTO borrower_t7 VALUES (2, 'sandesh', TO_DATE('2024-09-15', 'YYYY-MM-DD'), 'iceage', 'r');
+INSERT INTO borrower_t7 VALUES (3, 'Rahul', TO_DATE('2024-09-25', 'YYYY-MM-DD'), 'pokemon', 'i');
+INSERT INTO borrower_t7 VALUES (4, 'sarvesh', TO_DATE('2024-04-20', 'YYYY-MM-DD'), 'duel', 'r');
+INSERT INTO borrower_t7 VALUES (5, 'ishwari', TO_DATE('2024-05-22', 'YYYY-MM-DD'), 'hindikatha', 'i');
+
+DECLARE 
+    roll_no INT := 1;
+    book_name VARCHAR2(20) := 'harry potter';
+    mdays INT := 0;
+    ndays DATE;
+    fine_amt INT := 0;
+BEGIN
+    SELECT date_of_i INTO ndays 
+    FROM borrower_t7 
+    WHERE roll_no = roll_no AND name_of_book = book_name;
+    
+    mdays := SYSDATE - ndays;
+    
+    IF mdays >= 15 AND mdays < 30 THEN
+        fine_amt := (mdays - 15) * 5;
+    ELSIF mdays >= 30 THEN
+        fine_amt := 15 * 5 + (mdays - 30) * 50;
+    END IF;
+
+    UPDATE borrower_t7 SET status = 'r' 
+    WHERE roll_no = roll_no AND name_of_book = book_name;
+
+    IF fine_amt > 0 THEN
+        INSERT INTO fine_t7 VALUES (roll_no, SYSDATE, fine_amt);
+    END IF;
+
+    DBMS_OUTPUT.PUT_LINE('Fine Amount: ' || fine_amt);
+END;
+/
+
+SELECT * FROM fine_t7;
+SELECT * FROM borrower_t7;

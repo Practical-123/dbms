@@ -1,0 +1,48 @@
+// Insert record in article collection
+> db.article.insert( { id:1, title:"C++",conetnt:"Database", author:"ABC", authorage:13,dop:ISODate("2022-10-10"), category:"Comp",comment:[{name: "rahul", remark:"Good"}, {name: "Pooja", remark:"OK"} ] })
+
+> db.article.insert( { id:1, title:"DBMS",conetnt:"Database", author:"XYZ", authorage:33,dop:ISODate("2022-11-10"), category:"Comp",comment:[{name: "rutuja", remark:"Good"}, {name: "poonam", remark:"OK"} ] })
+WriteResult({ "nInserted" : 1 })
+
+//Display all record
+> db.article.find().pretty()
+
+
+//Display one  record with title DBMS
+> db.article.findOne({title: "DBMS"})
+
+
+//modify the comment made by the person on a certain article
+> db.article.update({ title:"C++", "comment.name":"rahul"}, {$set:{"comment.$.remark": "Very Good"}})
+> db.article.findOne({title: "C++"})
+
+
+
+//Insert record with save method with object id
+
+> db.article.save( { id:2, title:"CNS",conetnt:"Database", author:"MNP", authorage:23,dop:ISODate("2022-11-08"), category:"Comp",comment:[{name: "rutuja", remark:"VERY GOOD"}, {name: "poonam", remark:"BETTER"} ] })
+
+
+//Insert record with save method without object id
+
+> db.article.save( { title:"SPOS",conetnt:"Database", author:"POP", authorage:55,dop:ISODate("2012-11-08"), category:"Comp",comment:[{name: "rutuja", remark:"BEST"}, {name: "poonam", remark:"BETTER"} ] })
+
+> db.article.find().pretty()
+
+
+//Add one more comment for particular title
+> db.article.update({title: "SPOS"}, {$push: {comment:{name :"Rani",remark:"best"} }} )
+
+> db.article.findOne({title: "SPOS"})
+
+
+
+//Delete the document whose author age is less than 18
+> db.article.remove({authorage: {$lt:18 }})
+
+//Delete all document from collection
+> db.article.remove({})
+
+//delete the article collection
+> db.article.drop()
+

@@ -1,0 +1,106 @@
+1. Create the Database and Table in MySQL
+
+CREATE DATABASE library_db;
+USE library_db;
+
+CREATE TABLE Library (
+    B_id INT AUTO_INCREMENT PRIMARY KEY,
+    Title VARCHAR(255),
+    Edition VARCHAR(50),
+    no_of_copies INT
+);
+
+
+2. Python Code (with Tkinter GUI):
+
+import mysql.connector
+from tkinter import *
+
+# Establish a connection to the database
+def connect_db():
+    return mysql.connector.connect(
+        host="localhost",        
+        user="root",             
+        password="password",     
+        database="library_db"    
+    )
+
+
+def add_book():
+    try:
+        conn = connect_db()
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO Library (Title, Edition, no_of_copies) VALUES (%s, %s, %s)",
+                       (title_entry.get(), edition_entry.get(), copies_entry.get()))
+        conn.commit()
+        message.set("Book added successfully!")
+        clear_entries()
+    except mysql.connector.Error as err:
+        message.set(f"Error: {err}")
+    finally:
+        conn.close()
+
+def edit_book():
+    try:
+        conn = connect_db()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE Library SET Title=%s, Edition=%s, no_of_copies=%s WHERE B_id=%s",
+                       (title_entry.get(), edition_entry.get(), copies_entry.get(), book_id_entry.get()))
+        conn.commit()
+        message.set("Book updated successfully!")
+        clear_entries()
+    except mysql.connector.Error as err:
+        message.set(f"Error: {err}")
+    finally:
+        conn.close()
+
+
+def delete_book():
+    try:
+        conn = connect_db()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM Library WHERE B_id=%s", (book_id_entry.get(),))
+        conn.commit()
+        message.set("Book deleted successfully!")
+        clear_entries()
+    except mysql.connector.Error as err:
+        message.set(f"Error: {err}")
+    finally:
+        conn.close()
+
+
+def clear_entries():
+    book_id_entry.delete(0, END)
+    title_entry.delete(0, END)
+    edition_entry.delete(0, END)
+    copies_entry.delete(0, END)
+
+
+root = Tk()
+root.title("Library Management")
+
+
+Label(root, text="Book ID").grid(row=0, column=0)
+Label(root, text="Title").grid(row=1, column=0)
+Label(root, text="Edition").grid(row=2, column=0)
+Label(root, text="Number of Copies").grid(row=3, column=0)
+
+book_id_entry = Entry(root)
+title_entry = Entry(root)
+edition_entry = Entry(root)
+copies_entry = Entry(root)
+
+book_id_entry.grid(row=0, column=1)
+title_entry.grid(row=1, column=1)
+edition_entry.grid(row=2, column=1)
+copies_entry.grid(row=3, column=1)
+
+
+Button(root, text="Add Book", command=add_book).grid(row=4, column=0)
+Button(root, text="Edit Book", command=edit_book).grid(row=4, column=1)
+Button(root, text="Delete Book", command=delete_book).grid(row=4, column=2)
+
+message = StringVar()
+Label(root, textvariable=message).grid(row=5, column=0, columnspan=3)
+
+root.mainloop()

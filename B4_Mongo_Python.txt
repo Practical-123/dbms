@@ -1,0 +1,80 @@
+from pymongo import MongoClient
+    
+client = MongoClient("mongodb://localhost:27017/")
+mydatabase = client.myDB
+mycollection = mydatabase.user_Table
+
+# Insert data into the collection
+def insert(id, name, age, city):
+    record = {
+        'ID': id,
+        'Name': name,
+        'Age': int(age),  # Make sure age is an integer
+        'City': city
+    }
+    # Check if record already exists
+    if mycollection.find_one({"ID": id}):
+        print(f"Record with ID {id} already exists.")
+    else:
+        mycollection.insert_one(record)
+        print(f"Record with ID {id} added successfully.")
+
+# Update data by ID
+def update(id, name, age, city): 
+    result = mycollection.update_one(
+        {"ID": id},
+        {"$set": {"Name": name, "Age": int(age), "City": city}}
+    )
+    if result.matched_count > 0:
+        print(f"Record with ID {id} updated.")
+    else:
+        print(f"No record found with ID {id}.")
+
+# Show all records
+def showRec():
+    cursor = mycollection.find()
+    if cursor.count() > 0:
+        for record in cursor:
+            print(f"ID: {record['ID']}, Name: {record['Name']}, Age: {record['Age']}, City: {record['City']}")
+    else:
+        print("No records found.")
+
+# Delete a record by ID
+def delete(id):
+    result = mycollection.delete_one({'ID': id})
+    if result.deleted_count > 0:
+        print(f"Record with ID {id} deleted.")
+    else:
+        print(f"No record found with ID {id}.")
+
+# Main Menu Loop
+while True:
+    print("\n1. Insert Data")
+    print("2. Update Data")
+    print("3. Print Data")
+    print("4. Delete Data")
+    print("5. Exit")
+    choice = int(input("Enter Your Choice: "))
+    
+    if choice == 1:
+        id = input("Enter The ID: ")
+        name = input("Enter Name: ")
+        age = input("Enter Age: ")
+        city = input("Enter City: ")
+        insert(id, name, age, city)
+    elif choice == 2:
+        id = input("Enter the ID to be updated: ")
+        name = input("Enter new Name: ")
+        age = input("Enter new Age: ")
+        city = input("Enter new City: ")
+        update(id, name, age, city)
+    elif choice == 3:
+        showRec()
+    elif choice == 4:
+        id = input("Enter The ID to Delete: ")
+        delete(id)
+    elif choice == 5:
+        print("Exiting...")
+        quit()
+    else:
+        print("Invalid Selection. Please Try Again!")

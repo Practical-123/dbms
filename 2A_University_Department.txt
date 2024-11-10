@@ -1,0 +1,124 @@
+create database University;
+use University; 
+
+
+1. Create the Department table with a unique constraint on dept_name (Add primary key)
+
+CREATE TABLE Department ( dept_no INT PRIMARY KEY, dept_name VARCHAR(50) UNIQUE,building_name VARCHAR(50));
+
+
+2. Create the Instructor table with NOT NULL constraint on ins_name (Add foreign key in Instructor table)
+
+CREATE TABLE Instructor (ins_id INT PRIMARY KEY, ins_name VARCHAR(50) NOT NULL, dept_no INT, salary DECIMAL(10, 2), mob_no VARCHAR(15), FOREIGN KEY (dept_no) REFERENCES Department(dept_no));
+
+
+3. Create the Course table with the required fields
+
+CREATE TABLE Course (course_id INT PRIMARY KEY, title VARCHAR(100), dept_no INT, credits INT, FOREIGN KEY (dept_no) REFERENCES Department(dept_no));
+
+
+ 4. Create the Teaches table with teacher_id and course_id as foreign keys
+
+CREATE TABLE Teaches (teacher_id INT, course_id INT, semester VARCHAR(10), year INT, FOREIGN KEY (teacher_id) REFERENCES Instructor(ins_id), FOREIGN KEY (course_id) REFERENCES Course(course_id));
+
+
+3. Modify the Department table by adding a column budget
+
+ALTER TABLE Department ADD budget DECIMAL(10, 2);
+
+
+4. Create a unique index on the mobile number of Instructor table
+
+CREATE UNIQUE INDEX idx_instructor_mob_no ON Instructor (mob_no);
+
+
+5. Create a view of Instructor relation except the salary field
+
+CREATE VIEW Instructor_View AS SELECT ins_id, ins_name, dept_no, mob_no FROM Instructor;
+
+
+6. Insert a record into the Instructor table using the new view
+
+INSERT INTO Instructor_View (ins_id, ins_name, dept_no, mob_no) VALUES (101, 'John Doe', 1, '1234567890');
+
+
+7. Update the department number of a specific instructor using the view
+
+UPDATE Instructor_View SET dept_no = 2 WHERE ins_id = 101;
+
+
+8. Delete record of a specific instructor from the Instructor table using the view
+
+DELETE FROM Instructor_View WHERE ins_id = 101;
+
+
+9. Delete the view
+
+DROP VIEW Instructor_View;
+
+
+10. Remove the budget column from the Department table
+
+ALTER TABLE Department DROP COLUMN budget;
+
+
+11. Increase the size of the title field in the Course table
+
+ALTER TABLE Course MODIFY title VARCHAR(200);
+
+
+12. Delete the index from the Instructor table
+
+DROP INDEX idx_instructor_mob_no ON Instructor;
+
+
+13. Rename the Course table to New_Course
+
+ALTER TABLE Course RENAME TO New_Course;
+
+
+14. Create a view showing instructor name and title of the course they teach
+
+CREATE VIEW Instructor_Course_View AS SELECT Instructor.ins_name, New_Course.title FROM Instructor JOIN Teaches ON Instructor.ins_id = Teaches.teacher_id JOIN New_Course ON Teaches.course_id = New_Course.course_id;
+
+
+15. Delete the primary key from the Department table
+
+ALTER TABLE Department DROP PRIMARY KEY;
+
+
+16. Create a sequence or use AUTO_INCREMENT for course_id starting with 51
+
+ALTER TABLE New_Course MODIFY course_id INT AUTO_INCREMENT PRIMARY KEY;
+
+ALTER TABLE New_Course AUTO_INCREMENT = 51;
+
+
+17. Create a database and show all databases
+
+CREATE DATABASE UniversityDB;
+
+SHOW DATABASES;
+
+
+18. Create tables and show all tables
+
+USE UniversityDB;
+
+SHOW TABLES;
+
+
+19. Delete all records with TRUNCATE command
+
+TRUNCATE TABLE Instructor;
+
+TRUNCATE TABLE Department;
+
+TRUNCATE TABLE New_Course;
+
+TRUNCATE TABLE Teaches;
+
+
+20. Delete the Teaches table
+
+DROP TABLE Teaches;

@@ -1,0 +1,209 @@
+create database Medical;
+use Medical;
+
+-- Create Patient table with columns and constraints
+
+CREATE TABLE Patient (pat_id VARCHAR(10) PRIMARY KEY, pat_name VARCHAR(50), date_adm DATE, age INT, city VARCHAR(50),email VARCHAR(100));
+
+
+-- Create Doctor table with columns and constraints
+
+CREATE TABLE Doctor ( doc_id VARCHAR(10) PRIMARY KEY, doc_name VARCHAR(50), qualification VARCHAR(20), exp INT, dept VARCHAR(50), city VARCHAR(50), salary DECIMAL(10, 2));
+
+
+-- Create Treats table with foreign key constraints
+
+CREATE TABLE Treats (doc_id VARCHAR(10),pat_id VARCHAR(10),disease VARCHAR(50),fee DECIMAL(10, 2),FOREIGN KEY (doc_id) REFERENCES Doctor(doc_id) ON DELETE CASCADE, FOREIGN KEY (pat_id) REFERENCES Patient(pat_id) ON DELETE SET NULL);
+
+
+-- 1. Insert at least 5 records in each table
+
+INSERT INTO Patient (pat_id, pat_name, date_adm, age, city, email) VALUES
+('P01', 'Alice', '2023-01-10', 25, 'New York', 'alice@example.com'),
+('P02', 'Bob', '2023-02-15', 34, 'Los Angeles', NULL),
+('P03', 'Cathy', '2023-03-20', 45, 'Chicago', 'cathy@example.com'),
+('P04', 'David', '2023-04-25', 52, 'Houston', 'david@example.com'),
+('P05', 'Emma', '2023-05-30', 30, 'Phoenix', 'emma@example.com');
+
+INSERT INTO Doctor (doc_id, doc_name, qualification, exp, dept, city, salary) VALUES
+('D01', 'Dr. Smith', 'MD', 25, 'Cardiology', 'New York', 120000),
+('D02', 'Dr. Johnson', 'MBBS', 15, 'Dentistry', 'Los Angeles', 80000),
+('D03', 'Dr. Williams', 'MD', 20, 'Neurology', 'Chicago', 110000),
+('D04', 'Dr. Brown', 'MBBS', 8, 'Dermatology', 'Houston', 70000),
+('D05', 'Dr. Jones', 'MD', 18, 'Oncology', 'Phoenix', 95000);
+
+INSERT INTO Treats (doc_id, pat_id, disease, fee) VALUES
+('D01', 'P01', 'Cancer', 2000),
+('D03', 'P02', 'Heart Disease', 1500),
+('D05', 'P03', 'Cancer', 2500),
+('D02', 'P04', 'Toothache', 500),
+('D04', 'P05', 'Skin Allergy', 700);
+
+
+
+-- 2. Display all patients' names between the age group 18-50
+
+SELECT pat_name FROM Patient WHERE age BETWEEN 18 AND 50;
+
+
+
+-- 3. Display the list of doctors who are MD
+
+SELECT doc_name FROM Doctor WHERE qualification = 'MD';
+
+
+
+-- 4. Display the list of doctors whose experience is more than 20 years
+
+SELECT doc_name FROM Doctor WHERE exp > 20;
+
+
+
+-- 5. Display patients suffering from Cancer
+
+SELECT pat_name FROM Patient 
+JOIN Treats ON Patient.pat_id = Treats.pat_id
+WHERE disease = 'Cancer';
+
+
+
+-- 6. Display the patient name and the doctor name who are dealing with Cancer
+
+SELECT Patient.pat_name, Doctor.doc_name 
+FROM Patient 
+JOIN Treats ON Patient.pat_id = Treats.pat_id 
+JOIN Doctor ON Doctor.doc_id = Treats.doc_id
+WHERE disease = 'Cancer';
+
+
+
+-- 7. Display patient name whose name starts with 'A', ends with 'A', and has exactly 5 letters
+
+SELECT pat_name FROM Patient 
+WHERE pat_name LIKE 'A___A';
+
+
+
+-- 8. Remove all records of patients with Pat_id = 'P10'
+
+DELETE FROM Patient WHERE pat_id = 'P10';
+
+
+
+-- 9. Remove all records of doctor 'Suhas'
+
+DELETE FROM Doctor WHERE doc_name = 'Suhas';
+
+
+
+-- 10. Change the qualification of doctor 'Shubham' from 'MBBS' to 'MD'
+
+UPDATE Doctor SET qualification = 'MD' WHERE doc_name = 'Shubham';
+
+
+
+-- 11. Give a 5% raise to dentists and a 10% raise to cardiologists in a single query
+
+UPDATE Doctor
+SET salary = CASE 
+    WHEN dept = 'Dentistry' THEN salary * 1.05
+    WHEN dept = 'Cardiology' THEN salary * 1.10
+    ELSE salary
+END;
+
+
+
+-- 12. Display department-wise total salary of the doctors
+
+SELECT dept, SUM(salary) AS total_salary FROM Doctor GROUP BY dept;
+
+
+
+-- 13. Find the department with the highest average salary
+
+SELECT dept 
+FROM Doctor 
+GROUP BY dept 
+ORDER BY AVG(salary) DESC 
+LIMIT 1;
+
+
+
+-- 14. Find the average salary of doctors in the Dentistry department
+
+SELECT AVG(salary) AS avg_salary FROM Doctor WHERE dept = 'Dentistry';
+
+
+
+-- 15. Find the departments where the average salary of doctors is more than 50,000
+
+SELECT dept FROM Doctor GROUP BY dept HAVING AVG(salary) > 50000;
+
+
+
+-- 16. Find how many doctors work in the hospital
+
+SELECT COUNT(*) AS total_doctors FROM Doctor;
+
+
+
+-- 17. Find out how many doctors actually treated a patient
+
+SELECT COUNT(DISTINCT doc_id) AS doctors_treated FROM Treats;
+
+
+
+-- 18. List the cities in which either doctors or patients live
+
+SELECT DISTINCT city FROM Doctor
+UNION
+SELECT DISTINCT city FROM Patient;
+
+
+
+-- 19. List the cities where both doctors and patients live
+
+SELECT DISTINCT Doctor.city FROM Doctor
+JOIN Patient ON Doctor.city = Patient.city;
+
+
+
+-- 20. List doctor name, patient name, and their city if they live in the same city
+
+SELECT Doctor.doc_name, Patient.pat_name, Doctor.city 
+FROM Doctor 
+JOIN Patient ON Doctor.city = Patient.city;
+
+
+
+-- 21. a) Display names of doctors and patients as a single column (union)
+
+SELECT doc_name AS name FROM Doctor
+UNION
+SELECT pat_name AS name FROM Patient;
+
+
+
+-- 21. b) Let duplicate names appear multiple times (union all)
+
+SELECT doc_name AS name FROM Doctor
+UNION ALL
+SELECT pat_name AS name FROM Patient;
+
+
+
+-- 22. Total money collected so far from treatment of patients
+
+SELECT SUM(fee) AS total_money_collected FROM Treats;
+
+
+
+-- 23. Find the average salary of each department
+
+SELECT dept, AVG(salary) AS avg_salary FROM Doctor GROUP BY dept;
+
+
+
+-- 24. Display patient names who do not have an email ID
+
+SELECT pat_name FROM Patient WHERE email IS NULL;

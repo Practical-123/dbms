@@ -1,0 +1,45 @@
+
+---
+ Q. Map reduce operation with suitable example using MongoDB.
+Problem Statement: Create an orders collection with fields customer id, order date, status, price
+and items,quantity. Execute following queries using mapreduce.
+
+> db.ord.insert( { order_id: 1, cust_id:"A1",cust_name: "Aryan", phone_no:[9826475920, 9875124581], email_id:"aryan@gmail.com", item_name: "Laptop", dtofOrder: ISODate("2022-06-12"), qty: 2, amt: 90000, status: "D"})
+
+> db.ord.insertOne( { order_id: 2, cust_id:"A2",cust_name: "Ashish", phone_no:[9826475920, 9875124581], email_id:"ashish@gmail.com", item_name: "Head phone", dtofOrder: ISODate("2023-12-12"), qty: 3, amt: 90000, status: "P"})
+
+> db.ord.insertOne( { order_id: 3, cust_id:"B1",cust_name: "Rutuja", phone_no:[9826475920], email_id:"rutuja@gmail.com", item_name: "Watch", dtofOrder: ISODate("2022-06-07"), qty: 5, amt: 20000, status: "D"})
+
+> db.ord.insertOne( { order_id: 4, cust_id:"B2",cust_name: "Ayan", phone_no:[9826475920, 9875124581, 986578656], email_id:"ayan@gmail.com", item_name: "Bag", dtofOrder: ISODate("2022-11-12"), qty: 3, amt: 9000, status: "D"})
+
+> db.ord.insertOne( { order_id: 5, cust_id:"C1",cust_name: "Ronny", phone_no:[9826475920, 9875124581], email_id:"ronny@gmail.com", item_name: "Charger", dtofOrder: ISODate("2024-06-07"), qty: 1, amt: 900, status: "P"})
+
+> db.ord.find().pretty()
+
+1. Display total price per customer.
+> var map=function(){emit(this.cust_id,this.amt);}
+> var red=function(keys,values){return Array.sum(values);}
+> db.ord.mapReduce(map,red,{'out':'neworders'})
+
+> db.neworders.find().pretty()
+
+
+
+2. Display total price per customer having status= D
+> db.ord.mapReduce(map,red,{'query':{status:'D'},'out':'new1'})
+
+> db.ord.new1.find().pretty()
+> db.new1.find().pretty()
+
+
+
+3.Display total price per customer having status= P
+> db.ord.mapReduce(map,red,{'query':{status:'P'},'out':'new2'})
+
+> db.new2.find().pretty()
+
+
+4.Finding count of all keys in orders collection
+> db.ord.mapReduce(map,red,{'out':'new3'})
+
+> db.new3.find().pretty()

@@ -1,0 +1,105 @@
+Question. Insert atleast 5 records in Database
+
+test> db.orders.insertOne( { order_id: 1, cust_id:"A1",cust_name: "Aryan", phone_no:[9826475920, 9875124581], email_id:"aryan@gmail.com", item_name: "Laptop", dtofOrder: ISODate("2022-06-12"), qty: 2, amt: 90000, status: "D"})
+
+test> db.orders.insertOne( { order_id: 2, cust_id:"A2",cust_name: "Ashish", phone_no:[9826475920, 9875124581], email_id:"ashish@gmail.com", item_name: "Head phone", dtofOrder: ISODate("2023-12-12"), qty: 3, amt: 90000, status: "p"})
+
+
+test> db.orders.insertOne( { order_id: 3, cust_id:"B1",cust_name: "Rutuja", phone_no:[9826475920], email_id:"rutuja@gmail.com", item_name: "Watch", dtof
+Order: ISODate("2022-06-07"), qty: 5, amt: 20000, status: "D"})
+
+test> db.orders.insertOne( { order_id: 4, cust_id:"B2",cust_name: "Ayan", phone_no:[9826475920, 9875124581, 986578656], email_id:"ayan@gmail.com", item_name: "Bag", dtofOrder: ISODate("2022-11-12"), qty: 3, amt: 9000, status: "D"})
+
+test> db.orders.insertOne( { order_id: 5, cust_id:"C1",cust_name: "Ronny", phone_no:[9826475920, 9875124581], email_id:"ronny@gmail.com", item_name: "Charger", dtofOrder: ISODate("2024-06-07"), qty: 1, amt: 900, status: "P"})
+
+
+// display all record
+test> db.orders.find().pretty()
+
+1)Create simple index on cust_id and also on item_name. Try to make duplicate entry
+
+test> db.orders.createIndex({cust_id: 1})
+test> db.orders.createIndex({item_name: 1})
+
+test> db.orders.getIndexes()
+[
+  { v: 2, key: { _id: 1 }, name: '_id_' },
+  { v: 2, key: { cust_id: 1 }, name: 'cust_id_1' },
+  { v: 2, key: { item_name: 1 }, name: 'item_name_1' }
+]
+
+2)Create index on the order_id key and try to make duplicate entry
+
+test> db.orders.createIndex({order_id: 1}, {unique:true})
+test> db.orders.getIndexes({order_id: 1})
+
+
+3)Create a multikey index on phone_no key and find the customer with 2 phone no.
+
+test> db.orders.createIndex({phone_no: 1})
+test> db.orders.getIndexes()
+
+test> db.orders.find({phone_no: {$size: 2}}).pretty()
+
+4)Create Sparse index on email id key and show effect with and without indexing. (Hint: use find()  before and after applying index. Also use explain()
+
+test> db.orders.find( {email_id : "aryan@gamil.com"}).explain()
+test> db.orders.createIndex({email_id: 1},{sparse: true})
+test> db.ordes.find({email_id: "aryan@gmail.com"}).explain()
+
+
+5)Display all indexes created on order collection and also show the size of indexes
+test> db.orders.getIndexes()
+
+test> db.orders.totalIndexSize()
+
+
+6)Delete all indexes
+test> db.orders.dropIndexes()
+
+
+7)
+a)Find total no of orders received so far
+test> db.orders.find({status: "D"}).count()
+3
+b)How many orders pending
+test> db.orders.find({status: "P"}).count()
+1
+test> db.orders.find({status: "p"}).count()
+1
+
+8)Display all customer name of orders collection with no repetition
+test> db.orders.distinct("cust_name")
+
+
+      9)
+       a) Find total no of orders received so far
+test> db.orders.find({status: "D"}).count()
+3
+b)  How many orders pending
+test> db.orders.find({status: "P"}).count()
+
+test> db.orders.find({status: "p"}).count()
+
+
+10)Show result and details of sorting documents based on amount
+test> db.orders.find().sort({amt: 1}).pretty()
+
+11) show how many orders are placed by each customer 
+test> db.orders.aggregate({ $group:{_id: "cust_name", cnt_of_order:{$sum : 1}}})
+
+12) Display all customer ids and their total pending order amount in descending order
+test> db.orders.aggregate({$match : {status:"P"}}, {$group: {_id: "$cust_id", pend_amt:{$sum: "$amt"}}}, {$sort: {pend_amt: -1}})
+
+13) Display all customer ids in ascending order with total order amount which have been deliverd
+test> db.orders.aggregate({$match : {status:"D"}}, {$group: {_id: "$cust_id", total_amt:{$sum: "$amt"}}}, {$sort: {_id: 1}})
+
+
+14) show top selling items from orders collection
+test> db.orders.aggregate( {$group: {_id: "$item_name", totalqty: {$sum: "$qty"}}}, {$sort: {totalqty: -1 }}, {$limit: 1})
+
+15) Find the date on which maximun orders are received
+test> db.orders.aggregate( {$group: {_id: "$dtofOrder", cnt_of_order:{$sum: 1}}}, {$sort: {cnt_od_order: -1}}, {$limit: 1})
+
+16) Find which customer has placed maximun order 
+test> db.orders.aggregate( {$group: {_id: "$cust_name", cnt_of_order:{$sum: 1}}}, {$sort: {cnt_od_order: -1}}, {$limit: 1})

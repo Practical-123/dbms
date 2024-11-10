@@ -1,0 +1,55 @@
+CREATE TABLE studmarks (
+    name VARCHAR2(20),
+    marks NUMBER(10)
+);
+
+CREATE TABLE result (
+    roll_no NUMBER,
+    name VARCHAR2(20),
+    class VARCHAR2(20)
+);
+
+CREATE OR REPLACE PROCEDURE proc_grade (
+    roll_no IN NUMBER,
+    name IN VARCHAR2,
+    marks IN NUMBER
+) AS
+    class VARCHAR2(20);
+BEGIN
+    IF marks >= 990 AND marks <= 1500 THEN
+        class := 'Distinction';
+    ELSIF marks >= 900 AND marks <= 989 THEN
+        class := 'First Class';
+    ELSIF marks >= 825 AND marks <= 899 THEN
+        class := 'Second Class';
+    ELSIF marks >= 700 AND marks <= 824 THEN
+        class := 'Pass';
+    ELSE
+        class := 'Fail';
+    END IF;
+
+    INSERT INTO studmarks (name, marks) VALUES (name, marks);
+    INSERT INTO result (roll_no, name, class) VALUES (roll_no, name, class);
+END;
+/
+
+CREATE OR REPLACE FUNCTION tot_stud (classname VARCHAR2) RETURN NUMBER IS
+    total NUMBER;
+BEGIN
+    SELECT COUNT(*) INTO total FROM result WHERE class = classname;
+    RETURN total;
+END;
+/
+
+BEGIN
+    proc_grade(1, 'Alice', 1200);
+    proc_grade(2, 'Bob', 950);
+    proc_grade(3, 'Charlie', 870);
+    proc_grade(4, 'Daisy', 760);
+    proc_grade(5, 'Evan', 600);
+END;
+/
+
+SELECT * FROM studmarks;
+SELECT * FROM result;
+SELECT tot_stud('Distinction') AS total_distinction_students FROM dual;
